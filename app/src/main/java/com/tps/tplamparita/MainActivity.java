@@ -19,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.hardware.camera2.*;
 import android.widget.NumberPicker;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -47,6 +48,21 @@ public class MainActivity extends Activity {
     }
 
     private void init() {
+        context = MainActivity.this;
+        if (!verificarCamara()) {
+            AlertDialog mensajito = new AlertDialog.Builder(context)
+                    .setTitle("Se va a cerrar la aplicacion")
+                    .setMessage("No tenes camara")
+                    .setNegativeButton("Cerrar", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finishAndRemoveTask();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .create();
+            mensajito.show();
+        }
         handler = new Handler();
         preferencias = getSharedPreferences("Preferencias", Context.MODE_PRIVATE);
         bPrendido = false;
@@ -58,7 +74,6 @@ public class MainActivity extends Activity {
         npkIntervalo.setMaxValue(20);
         sonidito = new SoundPool.Builder().setMaxStreams(10).build();
         iSoundId = sonidito.load(getApplicationContext(), R.raw.cebo, 1);
-        context = MainActivity.this;
         if (bTitilando) {
             npkIntervalo.setEnabled(true);
             chkParpadeo.setChecked(true);
@@ -66,6 +81,10 @@ public class MainActivity extends Activity {
                 npkIntervalo.setValue(iIntervalo);
             }
         }
+    }
+
+    private boolean verificarCamara() {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
     }
 
     private void setearListeners() {
@@ -125,15 +144,15 @@ public class MainActivity extends Activity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     void SetLuz(boolean prendido) {
         ReproducirSonido();
+        int imagen = (prendido)? R.drawable.lampara_prendida : R.drawable.lampara_apagada;
+        imgbtnInterruptor.setImageResource(imagen);
         Context context = getApplicationContext();
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)){
-            CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-            try {
-                String cameraId = cameraManager.getCameraIdList()[0];
-                cameraManager.setTorchMode(cameraId, prendido);
-            } catch (CameraAccessException e) {
-                Log.d("Error", "No hay acceso a la camara");
-            }
+        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        try {
+            String cameraId = cameraManager.getCameraIdList()[0];
+            cameraManager.setTorchMode(cameraId, prendido);
+        } catch (CameraAccessException e) {
+            Log.d("Error", "No hay acceso a la camara");
         }
     }
 
