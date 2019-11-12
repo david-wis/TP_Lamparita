@@ -36,6 +36,7 @@ public class MainActivity extends Activity {
     boolean bPrendido;
     boolean bLuzPrendida;
     boolean bTitilando;
+    boolean bCamaraDisponible;
     int iIntervalo;
 
     @Override
@@ -43,20 +44,21 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         agregarReferencias();
-        setearListeners();
         init();
+        setearListeners();
     }
 
     private void init() {
         context = MainActivity.this;
-        if (!verificarCamara()) {
+        bCamaraDisponible = verificarCamara();
+        if (!bCamaraDisponible) {
             AlertDialog mensajito = new AlertDialog.Builder(context)
-                    .setTitle("Se va a cerrar la aplicacion")
+                    .setTitle("Advertencia")
                     .setMessage("No tenes camara")
                     .setNegativeButton("Cerrar", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            finishAndRemoveTask();
+                            //finishAndRemoveTask();
                         }
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)
@@ -126,9 +128,9 @@ public class MainActivity extends Activity {
                     bLuzPrendida = true;
                     handler.removeCallbacks(runnable);
                     SetLuz(bLuzPrendida);
-                }/* else {
+                } else {
                     establecerTitilado();
-                }*/
+                }
             } else {
                 bPrendido = false;
                 //bTitilando = false;
@@ -145,31 +147,35 @@ public class MainActivity extends Activity {
     void SetLuz(boolean prendido) {
         ReproducirSonido();
         int imagen = (prendido)? R.drawable.lampara_prendida : R.drawable.lampara_apagada;
-        imgbtnInterruptor.setImageResource(imagen);
-        Context context = getApplicationContext();
-        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        try {
-            String cameraId = cameraManager.getCameraIdList()[0];
-            cameraManager.setTorchMode(cameraId, prendido);
-        } catch (CameraAccessException e) {
-            Log.d("Error", "No hay acceso a la camara");
+        imgLamparita.setImageResource(imagen);
+        if (bCamaraDisponible) {
+            Context context = getApplicationContext();
+            CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+            try {
+                String cameraId = cameraManager.getCameraIdList()[0];
+                cameraManager.setTorchMode(cameraId, prendido);
+            } catch (CameraAccessException e) {
+                Log.d("Error", "No hay acceso a la camara");
+            }
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void establecerTitilado() {
-        runnable = new Runnable(){
-            public void run() {
-                bLuzPrendida = !bLuzPrendida;
-                SetLuz(bLuzPrendida);
-                //handler.postAtTime(this, System.currentTimeMillis()+iIntervalo*1000);
-                handler.removeCallbacks(runnable);
-                handler.postDelayed(this, iIntervalo*1000);
-            }
-        };
-        handler.removeCallbacks(runnable);
-        //handler.postAtTime(runnable, System.currentTimeMillis()+iIntervalo*1000);
-        handler.postDelayed(runnable, iIntervalo*1000);
+        if (runnable == null) {
+            runnable = new Runnable(){
+                public void run() {
+                    bLuzPrendida = !bLuzPrendida;
+                    SetLuz(bLuzPrendida);
+                    //handler.postAtTime(this, System.currentTimeMillis()+iIntervalo*1000);
+                    handler.removeCallbacks(runnable);
+                    handler.postDelayed(this, iIntervalo*1000);
+                }
+            };
+            handler.removeCallbacks(runnable);
+            //handler.postAtTime(runnable, System.currentTimeMillis()+iIntervalo*1000);
+            handler.postDelayed(runnable, iIntervalo*1000);
+        }
     }
 
     private void ReproducirSonido() {
