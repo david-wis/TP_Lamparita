@@ -48,6 +48,7 @@ public class MainActivity extends Activity {
         setearListeners();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void init() {
         context = MainActivity.this;
         bCamaraDisponible = verificarCamara();
@@ -83,6 +84,7 @@ public class MainActivity extends Activity {
                 npkIntervalo.setValue(iIntervalo);
             }
         }
+        establecerTitilado();
     }
 
     private boolean verificarCamara() {
@@ -109,11 +111,11 @@ public class MainActivity extends Activity {
             SharedPreferences.Editor editor = preferencias.edit();
             editor.putInt("Intervalo", iIntervalo);
             editor.commit();
-            if (runnable != null) {
+            /*if (runnable != null) {
                 handler.removeCallbacks(runnable);
                 //handler.postAtTime(runnable, System.currentTimeMillis()+iIntervalo*1000);
                 handler.postDelayed(runnable, iIntervalo*1000);
-            }
+            }*/
         }
     };
 
@@ -126,16 +128,16 @@ public class MainActivity extends Activity {
                 bPrendido = true;
                 if (!bTitilando) {
                     bLuzPrendida = true;
-                    handler.removeCallbacks(runnable);
+                    //handler.removeCallbacks(runnable);
                     SetLuz(bLuzPrendida);
-                } else {
+                }/* else {
                     establecerTitilado();
-                }
+                }*/
             } else {
                 bPrendido = false;
                 //bTitilando = false;
                 bLuzPrendida = false;
-                handler.removeCallbacks(runnable);
+                //handler.removeCallbacks(runnable);
                 SetLuz(bLuzPrendida);
             }
             int imagen = (bPrendido)? R.drawable.prendido : R.drawable.apagado;
@@ -162,20 +164,20 @@ public class MainActivity extends Activity {
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void establecerTitilado() {
-        if (runnable == null) {
-            runnable = new Runnable(){
-                public void run() {
+        runnable = new Runnable(){
+            public void run() {
+                if (bPrendido && bTitilando) {
                     bLuzPrendida = !bLuzPrendida;
                     SetLuz(bLuzPrendida);
-                    //handler.postAtTime(this, System.currentTimeMillis()+iIntervalo*1000);
-                    handler.removeCallbacks(runnable);
-                    handler.postDelayed(this, iIntervalo*1000);
                 }
-            };
-            handler.removeCallbacks(runnable);
-            //handler.postAtTime(runnable, System.currentTimeMillis()+iIntervalo*1000);
-            handler.postDelayed(runnable, iIntervalo*1000);
-        }
+                //handler.postAtTime(this, System.currentTimeMillis()+iIntervalo*1000);
+                //handler.removeCallbacks(runnable);
+                handler.postDelayed(this, iIntervalo*1000);
+            }
+        };
+        //handler.removeCallbacks(runnable);
+        //handler.postAtTime(runnable, System.currentTimeMillis()+iIntervalo*1000);
+        handler.postDelayed(runnable, iIntervalo*1000);
     }
 
     private void ReproducirSonido() {
@@ -194,9 +196,9 @@ public class MainActivity extends Activity {
                             @RequiresApi(api = Build.VERSION_CODES.M)
                             public void onClick(DialogInterface dialog, int which) {
                                 bTitilando = true;
-                                if (bPrendido) {
-                                    establecerTitilado();
-                                }
+                                //if (bPrendido) {
+                                    //establecerTitilado();
+                                //}
                                 npkIntervalo.setEnabled(true);
                                 SharedPreferences.Editor editor = preferencias.edit();
                                 editor.putBoolean("CheckboxTitilando", true);
@@ -213,7 +215,7 @@ public class MainActivity extends Activity {
                         .create();
                 mensajito.show();
             } else {
-                handler.removeCallbacks(runnable);
+                //handler.removeCallbacks(runnable);
                 bTitilando = false;
                 if (bPrendido) {
                     SetLuz(true);
