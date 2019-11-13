@@ -39,6 +39,7 @@ public class MainActivity extends Activity {
     boolean bCamaraDisponible;
     int iIntervalo;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,11 +112,6 @@ public class MainActivity extends Activity {
             SharedPreferences.Editor editor = preferencias.edit();
             editor.putInt("Intervalo", iIntervalo);
             editor.commit();
-            /*if (runnable != null) {
-                handler.removeCallbacks(runnable);
-                //handler.postAtTime(runnable, System.currentTimeMillis()+iIntervalo*1000);
-                handler.postDelayed(runnable, iIntervalo*1000);
-            }*/
         }
     };
 
@@ -128,16 +124,11 @@ public class MainActivity extends Activity {
                 bPrendido = true;
                 if (!bTitilando) {
                     bLuzPrendida = true;
-                    //handler.removeCallbacks(runnable);
                     SetLuz(bLuzPrendida);
-                }/* else {
-                    establecerTitilado();
-                }*/
+                }
             } else {
                 bPrendido = false;
-                //bTitilando = false;
                 bLuzPrendida = false;
-                //handler.removeCallbacks(runnable);
                 SetLuz(bLuzPrendida);
             }
             int imagen = (bPrendido)? R.drawable.prendido : R.drawable.apagado;
@@ -170,13 +161,9 @@ public class MainActivity extends Activity {
                     bLuzPrendida = !bLuzPrendida;
                     SetLuz(bLuzPrendida);
                 }
-                //handler.postAtTime(this, System.currentTimeMillis()+iIntervalo*1000);
-                //handler.removeCallbacks(runnable);
                 handler.postDelayed(this, iIntervalo*1000);
             }
         };
-        //handler.removeCallbacks(runnable);
-        //handler.postAtTime(runnable, System.currentTimeMillis()+iIntervalo*1000);
         handler.postDelayed(runnable, iIntervalo*1000);
     }
 
@@ -196,9 +183,6 @@ public class MainActivity extends Activity {
                             @RequiresApi(api = Build.VERSION_CODES.M)
                             public void onClick(DialogInterface dialog, int which) {
                                 bTitilando = true;
-                                //if (bPrendido) {
-                                    //establecerTitilado();
-                                //}
                                 npkIntervalo.setEnabled(true);
                                 SharedPreferences.Editor editor = preferencias.edit();
                                 editor.putBoolean("CheckboxTitilando", true);
@@ -215,7 +199,6 @@ public class MainActivity extends Activity {
                         .create();
                 mensajito.show();
             } else {
-                //handler.removeCallbacks(runnable);
                 bTitilando = false;
                 if (bPrendido) {
                     SetLuz(true);
